@@ -12,7 +12,7 @@ type GitlabClient struct {
 	Client           *gitlab.Client
 	Username         string
 	Password         string
-	IntegrateOptions *config.IntegrateOptions
+	IntegrateOptions []*config.IntegrateOption
 }
 
 func convertAppType(appType string) string {
@@ -37,15 +37,15 @@ func convertAppType(appType string) string {
 func (g *GitlabClient) GetIntegrateOption(appType string) (*config.IntegrateOption, error) {
 	appType = convertAppType(appType)
 
-	for _, integrateOption := range g.IntegrateOptions.IntegrateOptions {
+	for _, integrateOption := range g.IntegrateOptions {
 		if integrateOption.Pipeline == appType {
-			return &integrateOption, nil
+			return integrateOption, nil
 		}
 	}
 	return nil, errors.New("pipeline not found")
 }
 
-func NewGitlabClient(gitlabOptions *config.GitlabOptions, integrateOptions *config.IntegrateOptions) *GitlabClient {
+func NewGitlabClient(gitlabOptions *config.GitlabOptions, integrateOptions []*config.IntegrateOption) *GitlabClient {
 	var gitlabClient GitlabClient
 
 	gc, err := gitlab.NewBasicAuthClient(gitlabOptions.User,

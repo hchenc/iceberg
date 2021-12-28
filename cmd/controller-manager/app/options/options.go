@@ -14,7 +14,7 @@ type ControllerManagerConfig struct {
 	KubeOptions      *config.KubernetesOptions
 	HarborOptions    *config.HarborOptions
 	GitlabOptions    *config.GitlabOptions
-	IntegrateOptions *config.IntegrateOptions
+	IntegrateOptions []*config.IntegrateOption
 	LeaderElect      bool
 	LeaderElection   *leaderelection.LeaderElectionConfig
 }
@@ -37,11 +37,13 @@ func NewControllerManagerConfigOptions() *ControllerManagerConfig {
 
 func (c *ControllerManagerConfig) Validate() []error {
 	var errs []error
-	errs = append(errs, c.IntegrateOptions.Validate())
 	errs = append(errs, c.KubeOptions.Validate())
 	errs = append(errs, c.GitlabOptions.Validate())
 	errs = append(errs, c.HarborOptions.Validate())
 
+	for _, ingegrateOption := range c.IntegrateOptions {
+		errs = append(errs, ingegrateOption.Validate())
+	}
 	return errs
 }
 

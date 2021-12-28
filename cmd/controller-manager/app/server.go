@@ -7,6 +7,7 @@ import (
 	"github.com/hchenc/iceberg/pkg/clients/clientset"
 	"github.com/hchenc/iceberg/pkg/config"
 	"github.com/hchenc/iceberg/pkg/constants"
+	icecontroller "github.com/hchenc/iceberg/pkg/controllers"
 	"github.com/hchenc/iceberg/pkg/utils/term"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -18,12 +19,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
-)
-
-var (
-	kubeconfig           string
-	scheme               = runtime.NewScheme()
-	enableLeaderElection bool
 )
 
 func NewControllerManagerCommandOptions() *cobra.Command {
@@ -78,7 +73,7 @@ func NewControllerManagerCommandOptions() *cobra.Command {
 }
 
 func run(conf *options.ControllerManagerConfig, ctx context.Context) error {
-	cs := clientset.NewClientSetForControllerManagerConfigOptions(conf)
+	scheme := runtime.NewScheme()
 
 	mgrOptions := manager.Options{
 		Scheme: scheme,
@@ -100,4 +95,11 @@ func run(conf *options.ControllerManagerConfig, ctx context.Context) error {
 	if err != nil {
 		klog.Fatalf("unable to set up overall controller manager: %v", err)
 	}
+	cs := clientset.NewClientSetForControllerManagerConfigOptions(conf)
+	controller := icecontroller.NewControllerOrDie(cs, mgr)
+
+	if err = controller.Reconcile(ctx); err != nil {
+		klog.Fatalf("unable to run the manager: %v", err)
+	}
+	return nil
 }

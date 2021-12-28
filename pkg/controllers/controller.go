@@ -79,10 +79,12 @@ type Controller struct {
 	manager manager.Manager
 }
 
-func (c *Controller) Reconcile(ctx context.Context) {
+func (c *Controller) Reconcile(ctx context.Context) error {
 	if err := c.manager.Start(ctx); err != nil {
-		log.Fatalf("start reconciler failed for %s", err.Error())
+		log.Errorf("start reconciler failed for %s", err.Error())
+		return err
 	}
+	return nil
 }
 
 func NewControllerOrDie(cs *clientset.ClientSet, mgr manager.Manager) *Controller {

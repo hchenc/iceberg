@@ -26,9 +26,9 @@ const (
 )
 
 type IntegrationConfig struct {
-	HarborOptions    *HarborOptions    `json:"harbor_options" yaml:"HarborOptions"`
-	GitlabOptions    *GitlabOptions    `json:"gitlab_options" yaml:"GitlabOptions"`
-	IntegrateOptions *IntegrateOptions `json:"integrate_options" yaml:"IntegrateOptions"`
+	HarborOptions    *HarborOptions     `json:"harbor_options" yaml:"HarborOptions"`
+	GitlabOptions    *GitlabOptions     `json:"gitlab_options" yaml:"GitlabOptions"`
+	IntegrateOptions []*IntegrateOption `json:"integrate_options" yaml:"IntegrateOptions"`
 }
 
 type HarborOptions struct {
@@ -47,7 +47,7 @@ type GitlabOptions struct {
 }
 
 type IntegrateOptions struct {
-	IntegrateOptions []IntegrateOption
+	IntegrateOptions []*IntegrateOption `json:"integrate_option" yaml:"IntegrateOption"`
 }
 
 type IntegrateOption struct {
@@ -86,7 +86,7 @@ func (g *GitlabOptions) Validate() error {
 	return nil
 }
 
-func (i *IntegrateOptions) Validate() error {
+func (i *IntegrateOption) Validate() error {
 	return nil
 }
 
