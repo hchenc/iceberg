@@ -72,30 +72,30 @@ func NewControllerManagerCommandOptions() *cobra.Command {
 	return cmd
 }
 
-func run(conf *options.ControllerManagerConfig, ctx context.Context) error {
+func run(s *options.ControllerManagerConfig, ctx context.Context) error {
 	scheme := runtime.NewScheme()
 
 	mgrOptions := manager.Options{
 		Scheme: scheme,
 		Port:   9443,
 	}
-	if conf.LeaderElect {
-		mgrOptions.LeaderElection = conf.LeaderElect
+	if s.LeaderElect {
+		mgrOptions.LeaderElection = s.LeaderElect
 		mgrOptions.LeaderElectionNamespace = constants.DevopsNamespace
 		mgrOptions.LeaderElectionID = "iceberg-controller-manager-leader-election"
-		mgrOptions.LeaseDuration = &conf.LeaderElection.LeaseDuration
-		mgrOptions.RetryPeriod = &conf.LeaderElection.RetryPeriod
-		mgrOptions.RenewDeadline = &conf.LeaderElection.RenewDeadline
+		mgrOptions.LeaseDuration = &s.LeaderElection.LeaseDuration
+		mgrOptions.RetryPeriod = &s.LeaderElection.RetryPeriod
+		mgrOptions.RenewDeadline = &s.LeaderElection.RenewDeadline
 	}
 
 	klog.V(0).Info("setting up manager")
 	ctrl.SetLogger(klogr.New())
 	// Use 8443 instead of 443 cause we need root permission to bind port 443
-	mgr, err := manager.New(conf.KubeOptions.KubeConfig, mgrOptions)
+	mgr, err := manager.New(s.KubeOptions.KubeConfig, mgrOptions)
 	if err != nil {
 		klog.Fatalf("unable to set up overall controller manager: %v", err)
 	}
-	cs := clientset.NewClientSetForControllerManagerConfigOptions(conf)
+	cs := clientset.NewClientSetForControllerManagerConfigOptions(s)
 	controller := icecontroller.NewControllerOrDie(cs, mgr)
 
 	if err = controller.Reconcile(ctx); err != nil {

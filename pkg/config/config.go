@@ -10,7 +10,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	certutil "k8s.io/client-go/util/cert"
 	"k8s.io/client-go/util/homedir"
-	"k8s.io/klog"
 	"net"
 	"os"
 	"os/user"
@@ -78,56 +77,67 @@ type KubernetesOptions struct {
 	Burst int `json:"burst,omitempty" yaml:"burst"`
 }
 
-func (h *HarborOptions) Validate() error {
-	return nil
+func (h *HarborOptions) Validate() []error {
+	var errs []error
+
+	return errs
 }
 
-func (g *GitlabOptions) Validate() error {
-	return nil
+func (g *GitlabOptions) Validate() []error {
+	var errs []error
+
+	return errs
 }
 
-func (i *IntegrateOption) Validate() error {
-	return nil
+func (i *IntegrateOption) Validate() []error {
+	var errs []error
+
+	return errs
 }
 
-func (k *KubernetesOptions) Validate() error {
+func (k *KubernetesOptions) Validate() []error {
+	var errs []error
+
 	if len(k.KubeConfigPath) != 0 {
 		if config, err := clientcmd.BuildConfigFromFlags("", k.KubeConfigPath); err == nil {
 			k.KubeConfig = config
-			return nil
 		} else {
-			return err
+			errs = append(errs, err)
+			return errs
+		}
+	} else {
+		const (
+			tokenFile  = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+			rootCAFile = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+		)
+		host, port := os.Getenv("KUBERNETES_SERVICE_HOST"), os.Getenv("KUBERNETES_SERVICE_PORT")
+		if len(host) == 0 || len(port) == 0 {
+			errs = append(errs, errors.New("unable to load in-cluster configuration, KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT must be defined"))
+			return errs
+		}
+
+		token, err := ioutil.ReadFile(tokenFile)
+		if err != nil {
+			errs = append(errs, err)
+			return errs
+		}
+		tlsClientConfig := rest.TLSClientConfig{}
+		if _, err := certutil.NewPool(rootCAFile); err != nil {
+			errs = append(errs, fmt.Errorf("expected to load root CA config from %s, but got err: %v", rootCAFile, err))
+			return errs
+		} else {
+			tlsClientConfig.CAFile = rootCAFile
+		}
+
+		k.KubeConfig = &rest.Config{
+			// TODO: switch to using cluster DNS.
+			Host:            "https://" + net.JoinHostPort(host, port),
+			TLSClientConfig: tlsClientConfig,
+			BearerToken:     string(token),
+			BearerTokenFile: tokenFile,
 		}
 	}
-	const (
-		tokenFile  = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-		rootCAFile = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-	)
-	host, port := os.Getenv("KUBERNETES_SERVICE_HOST"), os.Getenv("KUBERNETES_SERVICE_PORT")
-	if len(host) == 0 || len(port) == 0 {
-		return errors.New("unable to load in-cluster configuration, KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT must be defined")
-	}
-
-	token, err := ioutil.ReadFile(tokenFile)
-	if err != nil {
-		return err
-	}
-	tlsClientConfig := rest.TLSClientConfig{}
-	if _, err := certutil.NewPool(rootCAFile); err != nil {
-		klog.Errorf("Expected to load root CA config from %s, but got err: %v", rootCAFile, err)
-	} else {
-		tlsClientConfig.CAFile = rootCAFile
-	}
-
-	k.KubeConfig = &rest.Config{
-		// TODO: switch to using cluster DNS.
-		Host:            "https://" + net.JoinHostPort(host, port),
-		TLSClientConfig: tlsClientConfig,
-		BearerToken:     string(token),
-		BearerTokenFile: tokenFile,
-	}
-
-	return nil
+	return errs
 }
 
 // NewKubernetesOptions returns a `zero` instance

@@ -37,12 +37,12 @@ func NewControllerManagerConfigOptions() *ControllerManagerConfig {
 
 func (c *ControllerManagerConfig) Validate() []error {
 	var errs []error
-	errs = append(errs, c.KubeOptions.Validate())
-	errs = append(errs, c.GitlabOptions.Validate())
-	errs = append(errs, c.HarborOptions.Validate())
+	errs = append(errs, c.KubeOptions.Validate()...)
+	errs = append(errs, c.GitlabOptions.Validate()...)
+	errs = append(errs, c.HarborOptions.Validate()...)
 
 	for _, ingegrateOption := range c.IntegrateOptions {
-		errs = append(errs, ingegrateOption.Validate())
+		errs = append(errs, ingegrateOption.Validate()...)
 	}
 	return errs
 }
@@ -54,7 +54,7 @@ func (c *ControllerManagerConfig) Flags() cliflag.NamedFlagSets {
 	fs := fss.FlagSet("leaderelection")
 
 	fs.BoolVar(&c.LeaderElect, "leader-elect", c.LeaderElect, ""+
-		"Whether to enable leader election. This field should be enabled when controller manager"+
+		"Whether to enable leader election. This field should be enabled when controller manager "+
 		"deployed with multiple replicas.")
 
 	kfs := fss.FlagSet("klog")
