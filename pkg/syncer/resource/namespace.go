@@ -15,17 +15,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	FAT = "功能验收测试环境(Feature Acceptance Test environment)"
-	SIT = "系统集成测试环境(System Integration Test environment)"
-	UAT = "用户验收测试环境(User Acceptance Test environment)"
-)
-
 var (
 	env = map[string]string{
-		"fat": FAT,
-		"sit": SIT,
-		"uat": UAT,
+		"fat": constants.FAT,
+		"sit": constants.SIT,
+		"uat": constants.UAT,
 	}
 )
 

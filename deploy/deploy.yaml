@@ -1,0 +1,163 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devops-system
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: pagers.devops.efunds.com
+spec:
+  group: devops.efunds.com
+  names:
+    kind: Pager
+    listKind: PagerList
+    plural: pagers
+    singular: pager
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: Pager is the Schema for the pagers API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: PagerSpec defines the desired state of Pager
+          properties:
+            message_content:
+              description: message_content is the target resource's type to record
+              type: string
+            message_id:
+              description: message_id is the target resource's id to record
+              type: string
+            message_name:
+              description: message_name is the target resource's name to record
+              type: string
+            message_type:
+              description: message_type is the target resource's type to record
+              type: string
+          type: object
+        status:
+          description: PagerStatus defines the observed state of Pager
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: devops-operator-role
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - '*'
+    verbs:
+      - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: devops-operator-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: devops-operator-role
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: devops-system
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: devops-config
+  namespace: devops-system
+data:
+  integrate.yaml: |
+    Gitlab:
+      Host: gitlab.hchenc.com
+      Password: chenhao2
+      Port: "80"
+      Token: ""
+      User: root
+      Version: ee
+    Harbor:
+      Host: http://harbor.hchenc.com:5088/api/v2.0
+      Password: Harbor12345
+      User: admin
+    IntegrateOptions:
+      - CiConfigPath: http://gitlab.hchenc.com/devops/devops/-/raw/main/java.yaml
+        Pipeline: java
+        Template: Java Web
+      - CiConfigPath: http://gitlab.hchenc.com/devops/devops/-/raw/master/python.yml
+        Pipeline: python
+        Template: Python Web
+      - CiConfigPath: http://gitlab.hchenc.com/devops/devops/-/raw/master/nodejs.yml
+        Pipeline: nodejs
+        Template: Nodejs
+      - CiConfigPath: .gitlab-ci.yml
+        Pipeline: default
+        Template: Blank Project
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: devops-operator-controller
+  namespace: devops-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+    spec:
+      volumes:
+        - name: configmaps
+          configMap:
+            name: devops-config
+            defaultMode: 420
+      containers:
+        - image: 364554757/devops:v0.1.2
+          args:
+            - run
+          name: controller
+          volumeMounts:
+            - name: configmaps
+              mountPath: /etc/iceberg
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 3000Mi
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: default
+
