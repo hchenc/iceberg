@@ -27,8 +27,9 @@ type ApplicationOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (r *ApplicationOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (r *ApplicationOperatorReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	application := &v1beta1.Application{}
+	ctx := context.Background()
 
 	err := r.Get(ctx, req.NamespacedName, application)
 	if err != nil {
@@ -109,7 +110,7 @@ type projectPredicate struct {
 }
 
 func (r projectPredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetNamespace()
+	name := e.Meta.GetNamespace()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else if strings.Contains(name, "sit") || strings.Contains(name, "fat") || strings.Contains(name, "uat") {
@@ -123,7 +124,7 @@ func (r projectPredicate) Update(e event.UpdateEvent) bool {
 	return false
 }
 func (r projectPredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Object.GetName()
+	name := e.Meta.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else {

@@ -27,8 +27,9 @@ type VolumeOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (v VolumeOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (v VolumeOperatorReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	volume := &v1.PersistentVolumeClaim{}
+	ctx := context.Background()
 
 	err := v.Get(ctx, req.NamespacedName, volume)
 	if err != nil {
@@ -83,8 +84,8 @@ type volumePredicate struct {
 }
 
 func (v volumePredicate) Create(e event.CreateEvent) bool {
-	namespace := e.Object.GetNamespace()
-	if _, exist := e.Object.GetLabels()[constants.KubesphereAppName]; !exist {
+	namespace := e.Meta.GetNamespace()
+	if _, exist := e.Meta.GetLabels()[constants.KubesphereAppName]; !exist {
 		return false
 	} else if strings.Contains(namespace, "sit") || strings.Contains(namespace, "fat") || strings.Contains(namespace, "uat") {
 		return true

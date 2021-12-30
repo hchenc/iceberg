@@ -1,16 +1,12 @@
 package syncer
 
 import (
-	"fmt"
-	"net/url"
 	"testing"
 )
 
 func TestClientService(t *testing.T) {
-	//gitLabGenerator,_ := NewGitLabGenerator()
+	//gitLabGenerator := gitlab.NewGitLabProjectGenerator("test", "test", context.Background(), nil, nil)
 	//service := NewGenerateService(gitLabGenerator)
-	asd, err := url.Parse("asd")
-	defer fmt.Println("finish")
-	fmt.Println(asd, err)
+	//service.Add("")
 	return
 }

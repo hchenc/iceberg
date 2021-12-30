@@ -27,8 +27,9 @@ type DeploymentOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (d *DeploymentOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (d *DeploymentOperatorReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	deployment := &v1.Deployment{}
+	ctx := context.Background()
 
 	err := d.Get(ctx, req.NamespacedName, deployment)
 	if err != nil {
@@ -76,8 +77,8 @@ type deploymentPredicate struct {
 }
 
 func (d deploymentPredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetNamespace()
-	labels := e.Object.GetLabels()
+	name := e.Meta.GetNamespace()
+	labels := e.Meta.GetLabels()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	}

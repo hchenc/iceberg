@@ -28,8 +28,9 @@ type RolebindingOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (r RolebindingOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (r RolebindingOperatorReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	rolebinding := &iamv1alpha2.WorkspaceRoleBinding{}
+	ctx := context.Background()
 
 	err := r.Get(ctx, req.NamespacedName, rolebinding)
 	if err != nil {
@@ -110,7 +111,7 @@ type rolebindingPredicate struct {
 }
 
 func (r rolebindingPredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetName()
+	name := e.Meta.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "admin") {
 		return false
 	} else {
@@ -122,7 +123,7 @@ func (r rolebindingPredicate) Update(e event.UpdateEvent) bool {
 	return false
 }
 func (r rolebindingPredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Object.GetName()
+	name := e.Meta.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "admin") {
 		return false
 	} else {

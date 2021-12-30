@@ -31,8 +31,9 @@ type WorkspaceOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (g *WorkspaceOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (g *WorkspaceOperatorReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	workspaceTemplate := &v1alpha2.WorkspaceTemplate{}
+	ctx := context.Background()
 
 	err := g.Get(ctx, req.NamespacedName, workspaceTemplate)
 	if err != nil {
@@ -132,7 +133,7 @@ type workspacePredicate struct {
 }
 
 func (r workspacePredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetName()
+	name := e.Meta.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else {
@@ -144,7 +145,7 @@ func (r workspacePredicate) Update(e event.UpdateEvent) bool {
 	return false
 }
 func (r workspacePredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Object.GetName()
+	name := e.Meta.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else {
