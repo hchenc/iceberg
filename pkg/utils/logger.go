@@ -15,6 +15,8 @@ func init() {
 
 	logger.Out = os.Stdout
 
+	//logger.Level = logrus.ErrorLevel
+
 	logger.Formatter = &logrus.JSONFormatter{}
 }
 
