@@ -4,9 +4,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"strings"
 )
+
 //TODO
 type NamespaceCreatePredicate struct {
-
 }
 
 func (r NamespaceCreatePredicate) Create(e event.CreateEvent) bool {

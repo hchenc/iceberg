@@ -4,9 +4,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"strings"
 )
+
 //TODO
 type NamespaceDeletePredicate struct {
-
 }
 
 func (r NamespaceDeletePredicate) Create(e event.CreateEvent) bool {

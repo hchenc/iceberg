@@ -17,33 +17,32 @@ var (
 		"kube",
 	}
 )
+
 //TODO
 type NamespacePredicate struct {
-
 	ExcludeNamespaces []string
 	IncludeNamespaces []string
 }
 
 func (n NamespacePredicate) filter(namespace string) (string, bool) {
 	//include namespace have higher priority
-	for _, ns := range n.IncludeNamespaces{
+	for _, ns := range n.IncludeNamespaces {
 		if strings.Contains(namespace, ns) {
-			return "",true
+			return "", true
 		}
 	}
 
-	for _, ns := range n.ExcludeNamespaces{
+	for _, ns := range n.ExcludeNamespaces {
 		if strings.Contains(namespace, ns) {
-			return "",false
+			return "", false
 		}
 	}
 	return namespace, false
 }
 
-
 func (n NamespacePredicate) Create(e event.CreateEvent) bool {
 	name := e.Object.GetNamespace()
-	if ns, result := n.filter(name); len(ns) == 0{
+	if ns, result := n.filter(name); len(ns) == 0 {
 		return result
 	} else {
 		return false
