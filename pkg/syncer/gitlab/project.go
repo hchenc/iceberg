@@ -157,7 +157,7 @@ func (p projectInfo) Create(obj interface{}) (interface{}, error) {
 				AccessLevel: git.AccessLevel(git.MaintainerPermissions),
 			})
 			defer resp.Body.Close()
-			if err = utilerrors.NewConflict(err); err != nil && !errors.IsConflict(err) {
+			if err := utilerrors.NewConflict(err); err != nil && !errors.IsConflict(err) {
 				p.logger.WithFields(appLogInfo).WithFields(logrus.Fields{
 					"message": "failed to add maintainer role to project",
 				}).Error(err)

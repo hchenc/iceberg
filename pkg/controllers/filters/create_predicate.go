@@ -10,7 +10,7 @@ type NamespaceCreatePredicate struct {
 }
 
 func (r NamespaceCreatePredicate) Create(e event.CreateEvent) bool {
-	name := e.Meta.GetNamespace()
+	name := e.Object.GetNamespace()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else if strings.Contains(name, "sit") || strings.Contains(name, "fat") || strings.Contains(name, "uat") {

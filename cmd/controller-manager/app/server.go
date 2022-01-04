@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"github.com/hchenc/iceberg/cmd/controller-manager/app/options"
 	"github.com/hchenc/iceberg/pkg/clients/clientset"
@@ -17,6 +18,7 @@ import (
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 )
 
 func NewControllerManagerCommandOptions() *cobra.Command {
@@ -46,7 +48,7 @@ func NewControllerManagerCommandOptions() *cobra.Command {
 				os.Exit(1)
 			}
 
-			if err = run(s, ctrl.SetupSignalHandler()); err != nil {
+			if err = run(s, signals.SetupSignalHandler()); err != nil {
 				klog.Error(err)
 				os.Exit(1)
 			}
@@ -70,7 +72,7 @@ func NewControllerManagerCommandOptions() *cobra.Command {
 	return cmd
 }
 
-func run(s *options.ControllerManagerConfig, stopCh <-chan struct{}) error {
+func run(s *options.ControllerManagerConfig, ctx context.Context) error {
 	scheme := runtime.NewScheme()
 
 	mgrOptions := manager.Options{
@@ -96,7 +98,7 @@ func run(s *options.ControllerManagerConfig, stopCh <-chan struct{}) error {
 	cs := clientset.NewClientSetForControllerManagerConfigOptions(s)
 	controller := icecontroller.NewControllerOrDie(cs, mgr)
 
-	if err = controller.Reconcile(stopCh); err != nil {
+	if err = controller.Reconcile(ctx); err != nil {
 		klog.Fatalf("unable to run the manager: %v", err)
 	}
 	return nil

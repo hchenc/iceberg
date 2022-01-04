@@ -26,9 +26,8 @@ type UserOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (u *UserOperatorReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+func (u *UserOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	user := &iamv1alpha2.User{}
-	ctx := context.Background()
 
 	err := u.Get(ctx, req.NamespacedName, user)
 	if err != nil {
@@ -93,7 +92,7 @@ type userPredicate struct {
 }
 
 func (r userPredicate) Create(e event.CreateEvent) bool {
-	name := e.Meta.GetName()
+	name := e.Object.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "admin") {
 		return false
 	} else {

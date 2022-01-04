@@ -41,7 +41,7 @@ func (n NamespacePredicate) filter(namespace string) (string, bool) {
 }
 
 func (n NamespacePredicate) Create(e event.CreateEvent) bool {
-	name := e.Meta.GetNamespace()
+	name := e.Object.GetNamespace()
 	if ns, result := n.filter(name); len(ns) == 0 {
 		return result
 	} else {
@@ -53,7 +53,7 @@ func (n NamespacePredicate) Update(e event.UpdateEvent) bool {
 	return false
 }
 func (n NamespacePredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Meta.GetName()
+	name := e.Object.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else {

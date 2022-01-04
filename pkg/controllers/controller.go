@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"github.com/hchenc/iceberg/pkg/clients/clientset"
 	"github.com/hchenc/iceberg/pkg/syncer"
 	"github.com/hchenc/iceberg/pkg/syncer/gitlab"
@@ -78,8 +79,8 @@ type Controller struct {
 	manager manager.Manager
 }
 
-func (c *Controller) Reconcile(stopCh <-chan struct{}) error {
-	if err := c.manager.Start(stopCh); err != nil {
+func (c *Controller) Reconcile(ctx context.Context) error {
+	if err := c.manager.Start(ctx); err != nil {
 		log.Errorf("start reconciler failed for %s", err.Error())
 		return err
 	}

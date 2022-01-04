@@ -26,9 +26,8 @@ type ServiceOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (s *ServiceOperatorReconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+func (s *ServiceOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	service := &v1.Service{}
-	ctx := context.Background()
 
 	err := s.Get(ctx, req.NamespacedName, service)
 	if err != nil {
@@ -76,7 +75,7 @@ type servicePredicate struct {
 }
 
 func (s servicePredicate) Create(e event.CreateEvent) bool {
-	name := e.Meta.GetNamespace()
+	name := e.Object.GetNamespace()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else if strings.Contains(name, "sit") || strings.Contains(name, "fat") || strings.Contains(name, "uat") {

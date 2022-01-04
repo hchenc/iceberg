@@ -17,7 +17,7 @@ func (r NamespaceDeletePredicate) Update(e event.UpdateEvent) bool {
 	return false
 }
 func (r NamespaceDeletePredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Meta.GetName()
+	name := e.Object.GetName()
 	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
 		return false
 	} else {
