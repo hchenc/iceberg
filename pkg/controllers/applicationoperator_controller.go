@@ -3,15 +3,15 @@ package controller
 import (
 	"context"
 	"github.com/go-logr/logr"
+	"github.com/hchenc/iceberg/pkg/controllers/filters"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
 	"time"
 
 	"github.com/hchenc/application/pkg/apis/app/v1beta1"
@@ -105,39 +105,19 @@ func (r *ApplicationOperatorReconciler) Reconcile(ctx context.Context, req recon
 	return reconcile.Result{}, nil
 }
 
-type projectPredicate struct {
-}
-
-func (r projectPredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetNamespace()
-	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
-		return false
-	} else if strings.Contains(name, "sit") || strings.Contains(name, "fat") || strings.Contains(name, "uat") {
-		return true
-	} else {
-		return false
-	}
-}
-func (r projectPredicate) Update(e event.UpdateEvent) bool {
-	//if pod label no changes or add labels, ignore
-	return false
-}
-func (r projectPredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Object.GetName()
-	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
-		return false
-	} else {
-		return true
-	}
-}
-func (r projectPredicate) Generic(e event.GenericEvent) bool {
-	return false
-}
-
 func (r *ApplicationOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1beta1.Application{}).
-		WithEventFilter(&projectPredicate{}).
+		WithEventFilter(
+			predicate.Or(
+				&filters.NamespaceCreatePredicate{
+					IncludeNamespaces: filters.DefaultIncludeNamespaces,
+				},
+				&filters.NamespaceDeletePredicate{
+					ExcludeNamespaces: filters.DefaultExcludeNamespaces,
+				},
+			),
+		).
 		Complete(r)
 }
 

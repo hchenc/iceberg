@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-logr/logr"
 	"github.com/hchenc/iceberg/pkg/apis/tenant/v1alpha2"
+	"github.com/hchenc/iceberg/pkg/controllers/filters"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -11,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"strings"
 
@@ -124,7 +126,18 @@ func (g *WorkspaceOperatorReconciler) Reconcile(ctx context.Context, req reconci
 func (g *WorkspaceOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha2.WorkspaceTemplate{}).
-		WithEventFilter(&workspacePredicate{}).
+		WithEventFilter(
+			predicate.Or(&filters.NameCreatePredicate{
+				ExcludeNames: []string{
+					"system",
+					"kube",
+				},
+			}, &filters.NameDeletePredicate{
+				ExcludeNames: []string{
+					"system",
+					"kube",
+				},
+			})).
 		Complete(g)
 }
 

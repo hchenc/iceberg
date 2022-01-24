@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -99,6 +100,7 @@ func NewControllerOrDie(cs *clientset.ClientSet, mgr manager.Manager) *Controlle
 	runtime.Must(iamv1alpha2.AddToScheme(mgr.GetScheme()))
 	runtime.Must(appsv1.AddToScheme(mgr.GetScheme()))
 	runtime.Must(corev1.AddToScheme(mgr.GetScheme()))
+	runtime.Must(v1.AddToScheme(mgr.GetScheme()))
 
 	installGenerator(c.Clientset)
 	installGeneratorService()

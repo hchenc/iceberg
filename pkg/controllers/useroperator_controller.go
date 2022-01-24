@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-logr/logr"
 	iamv1alpha2 "github.com/hchenc/iceberg/pkg/apis/iam/v1alpha2"
+	"github.com/hchenc/iceberg/pkg/controllers/filters"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -114,7 +115,9 @@ func (r userPredicate) Generic(e event.GenericEvent) bool {
 func (u *UserOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&iamv1alpha2.User{}).
-		WithEventFilter(&userPredicate{}).
+		WithEventFilter(&filters.NameCreatePredicate{
+			ExcludeNames: filters.DefaultExcludeNames,
+		}).
 		Complete(u)
 }
 

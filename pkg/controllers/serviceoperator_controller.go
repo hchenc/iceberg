@@ -3,16 +3,15 @@ package controller
 import (
 	"context"
 	"github.com/go-logr/logr"
+	"github.com/hchenc/iceberg/pkg/controllers/filters"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
 	"time"
 )
 
@@ -71,35 +70,10 @@ func (s *ServiceOperatorReconciler) Reconcile(ctx context.Context, req reconcile
 	return reconcile.Result{}, nil
 }
 
-type servicePredicate struct {
-}
-
-func (s servicePredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetNamespace()
-	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
-		return false
-	} else if strings.Contains(name, "sit") || strings.Contains(name, "fat") || strings.Contains(name, "uat") {
-		return true
-	} else {
-		return false
-	}
-}
-func (s servicePredicate) Update(e event.UpdateEvent) bool {
-	//if pod label no changes or add labels, ignore
-	return false
-}
-func (s servicePredicate) Delete(e event.DeleteEvent) bool {
-	return false
-
-}
-func (s servicePredicate) Generic(e event.GenericEvent) bool {
-	return false
-}
-
 func (s *ServiceOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1.Service{}).
-		WithEventFilter(&servicePredicate{}).
+		WithEventFilter(&filters.NamespaceCreatePredicate{IncludeNamespaces: filters.DefaultIncludeNamespaces}).
 		Complete(s)
 }
 

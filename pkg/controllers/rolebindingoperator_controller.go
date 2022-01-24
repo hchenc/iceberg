@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-logr/logr"
 	iamv1alpha2 "github.com/hchenc/iceberg/pkg/apis/iam/v1alpha2"
+	"github.com/hchenc/iceberg/pkg/controllers/filters"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -12,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -136,7 +138,12 @@ func (r rolebindingPredicate) Generic(e event.GenericEvent) bool {
 func (r *RolebindingOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&iamv1alpha2.WorkspaceRoleBinding{}).
-		WithEventFilter(&rolebindingPredicate{}).
+		WithEventFilter(
+			predicate.Or(&filters.NameCreatePredicate{
+				ExcludeNames: filters.DefaultExcludeNames,
+			}, &filters.NameDeletePredicate{
+				ExcludeNames: filters.DefaultExcludeNames,
+			})).
 		Complete(r)
 }
 

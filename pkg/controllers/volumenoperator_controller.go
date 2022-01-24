@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-logr/logr"
 	"github.com/hchenc/iceberg/pkg/constants"
+	"github.com/hchenc/iceberg/pkg/controllers/filters"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -12,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"strings"
 	"time"
@@ -75,7 +77,18 @@ func (v VolumeOperatorReconciler) Reconcile(ctx context.Context, req reconcile.R
 func (v *VolumeOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1.PersistentVolumeClaim{}).
-		WithEventFilter(&volumePredicate{}).
+		WithEventFilter(
+			predicate.And(
+				&filters.NamespaceCreatePredicate{
+					IncludeNamespaces: filters.DefaultIncludeNamespaces,
+				},
+				&filters.LabelCreatePredicate{
+					Force: false,
+					IncludeLabels: map[string]string{
+						constants.KubesphereVersion: constants.KubesphereInitVersion,
+					}},
+			),
+		).
 		Complete(v)
 }
 

@@ -4,16 +4,16 @@ import (
 	"context"
 	"github.com/go-logr/logr"
 	"github.com/hchenc/iceberg/pkg/constants"
+	"github.com/hchenc/iceberg/pkg/controllers/filters"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
 	"time"
 )
 
@@ -72,39 +72,21 @@ func (d *DeploymentOperatorReconciler) Reconcile(ctx context.Context, req reconc
 	return reconcile.Result{}, nil
 }
 
-type deploymentPredicate struct {
-}
-
-func (d deploymentPredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetNamespace()
-	labels := e.Object.GetLabels()
-	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
-		return false
-	}
-
-	if strings.Contains(name, "sit") || strings.Contains(name, "fat") || strings.Contains(name, "uat") {
-		if version, exists := labels[constants.KubesphereVersion]; exists && version == constants.KubesphereInitVersion {
-			return true
-		}
-	}
-	return false
-}
-func (d deploymentPredicate) Update(e event.UpdateEvent) bool {
-	//if pod label no changes or add labels, ignore
-	return false
-}
-func (d deploymentPredicate) Delete(e event.DeleteEvent) bool {
-	return false
-
-}
-func (d deploymentPredicate) Generic(e event.GenericEvent) bool {
-	return false
-}
-
 func (d *DeploymentOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1.Deployment{}).
-		WithEventFilter(&deploymentPredicate{}).
+		WithEventFilter(
+			predicate.And(
+				&filters.NamespaceCreatePredicate{
+					IncludeNamespaces: filters.DefaultIncludeNamespaces,
+				},
+				&filters.LabelCreatePredicate{
+					Force: true,
+					IncludeLabels: map[string]string{
+						constants.KubesphereVersion: constants.KubesphereInitVersion,
+					}},
+			),
+		).
 		Complete(d)
 }
 
