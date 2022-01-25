@@ -4,7 +4,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 )
 
-//TODO
 type NamespaceCreatePredicate struct {
 	//include namespaces has higher priority
 	IncludeNamespaces []string

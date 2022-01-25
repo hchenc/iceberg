@@ -29,11 +29,11 @@ func (p projectInfo) Create(obj interface{}) (interface{}, error) {
 		},
 		StorageLimit: 0,
 	}, &harbor2.ProjectApiCreateProjectOpts{})
-	//defer resp.Body.Close()
+	defer resp.Body.Close()
 	if err := utilerrors.NewConflict(err); err == nil || errors.IsConflict(err) {
 		return resp, nil
 	} else {
-		return nil, nil
+		return nil, err
 	}
 }
 
