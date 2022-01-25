@@ -11,11 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"strings"
-
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 )
@@ -108,42 +105,16 @@ func (r RolebindingOperatorReconciler) Reconcile(ctx context.Context, req reconc
 	return reconcile.Result{}, nil
 }
 
-type rolebindingPredicate struct {
-}
-
-func (r rolebindingPredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetName()
-	if strings.Contains(name, "system") || strings.Contains(name, "admin") {
-		return false
-	} else {
-		return true
-	}
-}
-func (r rolebindingPredicate) Update(e event.UpdateEvent) bool {
-	//if pod label no changes or add labels, ignore
-	return false
-}
-func (r rolebindingPredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Object.GetName()
-	if strings.Contains(name, "system") || strings.Contains(name, "admin") {
-		return false
-	} else {
-		return true
-	}
-}
-func (r rolebindingPredicate) Generic(e event.GenericEvent) bool {
-	return false
-}
-
 func (r *RolebindingOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&iamv1alpha2.WorkspaceRoleBinding{}).
 		WithEventFilter(
-			predicate.Or(&filters.NameCreatePredicate{
-				ExcludeNames: filters.DefaultExcludeNames,
-			}, &filters.NameDeletePredicate{
-				ExcludeNames: filters.DefaultExcludeNames,
-			})).
+			predicate.Or(
+				&filters.NameCreatePredicate{
+					ExcludeNames: filters.DefaultExcludeNames,
+				}, &filters.NameDeletePredicate{
+					ExcludeNames: filters.DefaultExcludeNames,
+				})).
 		Complete(r)
 }
 

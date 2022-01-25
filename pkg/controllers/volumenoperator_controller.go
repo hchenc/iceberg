@@ -11,11 +11,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
 	"time"
 )
 
@@ -85,37 +83,11 @@ func (v *VolumeOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				&filters.LabelCreatePredicate{
 					Force: false,
 					IncludeLabels: map[string]string{
-						constants.KubesphereVersion: constants.KubesphereInitVersion,
+						constants.KubesphereAppName: "anything",
 					}},
 			),
 		).
 		Complete(v)
-}
-
-type volumePredicate struct {
-}
-
-func (v volumePredicate) Create(e event.CreateEvent) bool {
-	namespace := e.Object.GetNamespace()
-	if _, exist := e.Object.GetLabels()[constants.KubesphereAppName]; !exist {
-		return false
-	} else if strings.Contains(namespace, "sit") || strings.Contains(namespace, "fat") || strings.Contains(namespace, "uat") {
-		return true
-	} else {
-		return false
-	}
-}
-
-func (v volumePredicate) Delete(event.DeleteEvent) bool {
-	return false
-}
-
-func (v volumePredicate) Update(event.UpdateEvent) bool {
-	return false
-}
-
-func (v volumePredicate) Generic(event.GenericEvent) bool {
-	return false
 }
 
 func SetUpVolumeReconcile(mgr manager.Manager) {

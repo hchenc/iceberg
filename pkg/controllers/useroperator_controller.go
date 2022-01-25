@@ -10,10 +10,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
 	"time"
 )
 
@@ -87,29 +85,6 @@ func (u *UserOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Re
 		"action": "UserToUser",
 	}).Info("finish to action")
 	return reconcile.Result{}, nil
-}
-
-type userPredicate struct {
-}
-
-func (r userPredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetName()
-	if strings.Contains(name, "system") || strings.Contains(name, "admin") {
-		return false
-	} else {
-		return true
-	}
-}
-func (r userPredicate) Update(e event.UpdateEvent) bool {
-	//if pod label no changes or add labels, ignore
-	return false
-}
-func (r userPredicate) Delete(e event.DeleteEvent) bool {
-	return false
-
-}
-func (r userPredicate) Generic(e event.GenericEvent) bool {
-	return false
 }
 
 func (u *UserOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {

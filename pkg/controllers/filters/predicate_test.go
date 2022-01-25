@@ -67,8 +67,7 @@ func TestNamespacesFilter(t *testing.T) {
 	assert.Equal(t, exists, false)
 }
 
-
-func TestNamesFilter(t *testing.T){
+func TestNamesFilter(t *testing.T) {
 	var result bool
 
 	version := map[string]string{
@@ -83,14 +82,14 @@ func TestNamesFilter(t *testing.T){
 	}
 
 	labels1 := map[string]string{
-		constants.KubesphereVersion: constants.KubesphereInitVersion,
+		constants.KubesphereVersion:     constants.KubesphereInitVersion,
 		constants.KubesphereInitVersion: constants.KubesphereVersion,
-		constants.KubesphereAppName: "demo",
+		constants.KubesphereAppName:     "demo",
 	}
 	labels2 := map[string]string{
-		constants.KubesphereVersion: constants.KubesphereInitVersion,
+		constants.KubesphereVersion:     constants.KubesphereInitVersion,
 		constants.KubesphereInitVersion: constants.KubesphereVersion,
-		constants.KubesphereAppName: "123",
+		constants.KubesphereAppName:     "123",
 	}
 
 	result = checkLabels(labels1, version, true)
