@@ -9,6 +9,7 @@ require (
 	github.com/hchenc/application v1.0.1
 	github.com/hchenc/go-harbor v0.0.3
 	github.com/hchenc/pager v0.0.2
+	github.com/magiconair/properties v1.8.5
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/pflag v1.0.5

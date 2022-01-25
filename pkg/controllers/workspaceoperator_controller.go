@@ -10,17 +10,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
-
 	"time"
 )
 
 var (
-	action string = "WorkspaceTemplateToGroup"
+	action = "WorkspaceTemplateToGroup"
 )
 
 func init() {
@@ -139,33 +136,6 @@ func (g *WorkspaceOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				},
 			})).
 		Complete(g)
-}
-
-type workspacePredicate struct {
-}
-
-func (r workspacePredicate) Create(e event.CreateEvent) bool {
-	name := e.Object.GetName()
-	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
-		return false
-	} else {
-		return true
-	}
-}
-func (r workspacePredicate) Update(e event.UpdateEvent) bool {
-	//if pod label no changes or add labels, ignore
-	return false
-}
-func (r workspacePredicate) Delete(e event.DeleteEvent) bool {
-	name := e.Object.GetName()
-	if strings.Contains(name, "system") || strings.Contains(name, "kube") {
-		return false
-	} else {
-		return true
-	}
-}
-func (r workspacePredicate) Generic(e event.GenericEvent) bool {
-	return false
 }
 
 func SetUpGroupReconcile(mgr manager.Manager) {

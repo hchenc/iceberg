@@ -79,8 +79,12 @@ func (i *IngressOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1.Ingress{}).
 		WithEventFilter(
 			predicate.Or(
-				&filters.NamespaceCreatePredicate{},
-				&filters.NamespaceDeletePredicate{},
+				&filters.NamespaceCreatePredicate{
+					IncludeNamespaces: filters.DefaultIncludeNamespaces,
+				},
+				&filters.NamespaceDeletePredicate{
+					IncludeNamespaces: filters.DefaultIncludeNamespaces,
+				},
 			),
 		).
 		Complete(i)

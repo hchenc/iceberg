@@ -21,15 +21,16 @@ var (
 )
 
 func checkIndexKey(array []string, indexKey string) (bool, bool) {
-	var result bool
+	exists, verified := false, false
 
 	if len(array) != 0 {
+		verified = true
 		for _, ns := range array {
-			result = result || strings.Contains(indexKey, ns)
+			exists = exists || strings.Contains(indexKey, ns)
 		}
-		return result, true
+		return exists, verified
 	}
-	return false, false
+	return exists, verified
 }
 
 func checkLabels(labels map[string]string, target map[string]string, force bool) bool {

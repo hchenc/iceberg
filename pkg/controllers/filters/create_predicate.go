@@ -14,12 +14,12 @@ type NamespaceCreatePredicate struct {
 func (r NamespaceCreatePredicate) Create(e event.CreateEvent) bool {
 	name := e.Object.GetNamespace()
 
-	if result, exists := checkIndexKey(r.IncludeNamespaces, name); exists && result {
-		return result
+	if exists, verified := checkIndexKey(r.IncludeNamespaces, name); verified {
+		return exists
 	}
 
-	if result, exists := checkIndexKey(r.ExcludeNamespaces, name); exists && result {
-		return !result
+	if exists, verified := checkIndexKey(r.ExcludeNamespaces, name); verified {
+		return !exists
 	}
 
 	return false
@@ -44,12 +44,12 @@ type NameCreatePredicate struct {
 func (r NameCreatePredicate) Create(e event.CreateEvent) bool {
 	name := e.Object.GetName()
 
-	if result, exists := checkIndexKey(r.IncludeNames, name); exists && result {
-		return result
+	if exists, verified := checkIndexKey(r.IncludeNames, name); verified {
+		return exists
 	}
 
-	if result, exists := checkIndexKey(r.ExcludeNames, name); exists && result {
-		return !result
+	if exists, verified := checkIndexKey(r.ExcludeNames, name); verified {
+		return !exists
 	}
 
 	return false

@@ -22,12 +22,12 @@ func (r NamespaceDeletePredicate) Delete(e event.DeleteEvent) bool {
 
 	name := e.Object.GetName()
 
-	if result, exists := checkIndexKey(r.IncludeNamespaces, name); exists && result {
-		return result
+	if exists, verified := checkIndexKey(r.IncludeNamespaces, name); verified {
+		return exists
 	}
 
-	if result, exists := checkIndexKey(r.ExcludeNamespaces, name); exists && result {
-		return !result
+	if exists, verified := checkIndexKey(r.ExcludeNamespaces, name); verified {
+		return !exists
 	}
 
 	return false
@@ -52,12 +52,12 @@ func (r NameDeletePredicate) Update(e event.UpdateEvent) bool {
 func (r NameDeletePredicate) Delete(e event.DeleteEvent) bool {
 	name := e.Object.GetName()
 
-	if result, exists := checkIndexKey(r.IncludeNames, name); exists && result {
-		return result
+	if exists, verified := checkIndexKey(r.IncludeNames, name); verified {
+		return exists
 	}
 
-	if result, exists := checkIndexKey(r.ExcludeNames, name); exists && result {
-		return !result
+	if exists, verified := checkIndexKey(r.ExcludeNames, name); verified {
+		return !exists
 	}
 	return false
 }
