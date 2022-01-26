@@ -3,6 +3,8 @@ package resource
 import (
 	"context"
 	baseErr "errors"
+	"fmt"
+	"github.com/hchenc/iceberg/pkg/constants"
 	"github.com/hchenc/iceberg/pkg/syncer"
 	"github.com/hchenc/iceberg/pkg/utils"
 	"github.com/sirupsen/logrus"
@@ -67,6 +69,15 @@ func (d deploymentInfo) Create(obj interface{}) (interface{}, error) {
 				},
 			}
 		}).(*v1.Deployment)
+		if dps, err := d.kubeClient.AppsV1().Deployments(deployment.Namespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: fmt.Sprintf("%s=%s", constants.KubesphereAppName, deployment.Labels[constants.KubesphereAppName]),
+		}); err == nil {
+			if len(dps.Items) != 0 {
+				return nil, nil
+			}
+		} else {
+			return nil, err
+		}
 		_, err := d.kubeClient.AppsV1().Deployments(namespace).Create(d.ctx, deployment, metav1.CreateOptions{})
 		if err == nil || errors.IsAlreadyExists(err) {
 			d.logger.WithFields(dpLogInfo).WithFields(logrus.Fields{
