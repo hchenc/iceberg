@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/hchenc/iceberg/pkg/clients/clientset"
 	"github.com/hchenc/iceberg/pkg/syncer"
-	"github.com/hchenc/iceberg/pkg/syncer/gitlab"
-	"github.com/hchenc/iceberg/pkg/syncer/harbor"
-	"github.com/hchenc/iceberg/pkg/syncer/resource"
+	"github.com/hchenc/iceberg/pkg/syncer/registries/harbor"
+	"github.com/hchenc/iceberg/pkg/syncer/resources"
+	"github.com/hchenc/iceberg/pkg/syncer/scm/gitlab"
 	"github.com/hchenc/iceberg/pkg/utils"
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
@@ -119,13 +119,13 @@ func installGenerator(clientset *clientset.ClientSet) {
 	userGenerator = gitlab.NewUserGenerator(clientset.Ctx, clientset.GitlabClient, clientset.PagerClient)
 	memberGenerator = gitlab.NewMemberGenerator(clientset.Ctx, clientset.GitlabClient, clientset.PagerClient)
 
-	namespaceGenerator = resource.NewNamespaceGenerator(clientset.Ctx, clientset.Kubeclient)
-	applicationGenerator = resource.NewApplicationGenerator(clientset.Ctx, clientset.Kubeclient, clientset.AppClient)
-	rolebindingGenerator = resource.NewRolebindingGenerator(clientset.Ctx, clientset.Kubeclient)
-	deploymentGenerator = resource.NewDeploymentGenerator(clientset.Ctx, clientset.Kubeclient)
-	serviceGenerator = resource.NewServiceGenerator(clientset.Ctx, clientset.Kubeclient)
-	volumeGenerator = resource.NewVolumeGenerator(clientset.Ctx, clientset.Kubeclient)
-	secretGenerator = resource.NewSecretGenerator(clientset.Ctx, clientset.Kubeclient)
+	namespaceGenerator = resources.NewNamespaceGenerator(clientset.Ctx, clientset.Kubeclient)
+	applicationGenerator = resources.NewApplicationGenerator(clientset.Ctx, clientset.Kubeclient, clientset.AppClient)
+	rolebindingGenerator = resources.NewRolebindingGenerator(clientset.Ctx, clientset.Kubeclient)
+	deploymentGenerator = resources.NewDeploymentGenerator(clientset.Ctx, clientset.Kubeclient)
+	serviceGenerator = resources.NewServiceGenerator(clientset.Ctx, clientset.Kubeclient)
+	volumeGenerator = resources.NewVolumeGenerator(clientset.Ctx, clientset.Kubeclient)
+	secretGenerator = resources.NewSecretGenerator(clientset.Ctx, clientset.Kubeclient)
 
 	harborGenerator = harbor.NewHarborProjectGenerator("", "", clientset.HarborClient)
 }

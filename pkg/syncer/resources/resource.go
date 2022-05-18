@@ -1,4 +1,4 @@
-package resource
+package resources
 
 type assembleResourceFunc func(obj interface{}, namespace string) interface{}
 

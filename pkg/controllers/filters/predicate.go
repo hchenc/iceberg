@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"strings"
 )
 
@@ -19,6 +20,24 @@ var (
 		"admin",
 	}
 )
+
+type filterPredicate struct {}
+
+func (f filterPredicate) Create(event.CreateEvent) bool {
+	return false
+}
+
+func (f filterPredicate) Delete(event.DeleteEvent) bool {
+	return false
+}
+
+func (f filterPredicate) Update(event.UpdateEvent) bool {
+	return false
+}
+
+func (f filterPredicate) Generic(event.GenericEvent) bool {
+	return false
+}
 
 func checkIndexKey(array []string, indexKey string) (bool, bool) {
 	exists, verified := false, false

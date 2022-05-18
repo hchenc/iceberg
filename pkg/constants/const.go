@@ -16,4 +16,6 @@ const (
 	FAT = "功能验收测试环境(Feature Acceptance Test environment)"
 	SIT = "系统集成测试环境(System Integration Test environment)"
 	UAT = "用户验收测试环境(User Acceptance Test environment)"
+
+	AllowedSecretType = "Opaque"
 )

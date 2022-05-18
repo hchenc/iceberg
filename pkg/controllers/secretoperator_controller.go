@@ -11,6 +11,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 )
@@ -29,7 +30,7 @@ type SecretOperatorReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-func (s *SecretOperatorReconciler) Reconcile(ctx context.Context,req reconcile.Request) (reconcile.Result, error) {
+func (s *SecretOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	secret := &v1.Secret{}
 
 	err := s.Get(ctx, req.NamespacedName, secret)
@@ -39,7 +40,7 @@ func (s *SecretOperatorReconciler) Reconcile(ctx context.Context,req reconcile.R
 			return ctrl.Result{}, nil
 		} else {
 			log.Logger.WithFields(logrus.Fields{
-				"secret":   req.Name,
+				"secret":    req.Name,
 				"namespace": req.Namespace,
 				"message":   "failed to reconcile secret",
 			}).Error(err)
@@ -72,13 +73,13 @@ func (s *SecretOperatorReconciler) Reconcile(ctx context.Context,req reconcile.R
 		}
 		log.Logger.WithFields(logrus.Fields{
 			"event":    "create",
-			"resource": "Service",
+			"resource": "Secret",
 			"name":     secret.Name,
 			"result":   "success",
-		}).Infof("finish to sync service %s", secret.Name)
+		}).Infof("finish to sync Secret %s", secret.Name)
 	}
 	log.Logger.WithFields(logrus.Fields{
-		"action": "PersistentVolume",
+		"action": secretAction,
 	}).Info("finish to action")
 	return reconcile.Result{}, nil
 }
@@ -87,9 +88,12 @@ func (s *SecretOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1.Secret{}).
 		WithEventFilter(
+			predicate.And(
 				&filters.NamespaceCreatePredicate{
 					IncludeNamespaces: filters.DefaultIncludeNamespaces,
 				},
+				&filters.SecretCreatePredicate{},
+			),
 		).
 		Complete(s)
 }

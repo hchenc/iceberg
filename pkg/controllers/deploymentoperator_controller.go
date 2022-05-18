@@ -45,6 +45,17 @@ func (d *DeploymentOperatorReconciler) Reconcile(ctx context.Context, req reconc
 		log.Logger.WithFields(logrus.Fields{
 			"action": "DeploymentToEnv",
 		}).Info("start to action")
+		//inject reloader annotation
+		if _, exist := deployment.Labels["reloader.efunds.com/auto"]; !exist {
+			deployment.Labels["reloader.efunds.com/auto"] = "true"
+			if err := d.Update(ctx, deployment); err != nil {
+				log.Logger.WithFields(logrus.Fields{
+					"action": "ReloadInject",
+				}).Error(err)
+				return ctrl.Result{}, err
+			}
+		}
+
 		//sync deployment to all environment(fat|uat|sit)
 		_, err := deploymentGeneratorService.Add(deployment)
 		if err != nil {
