@@ -37,6 +37,9 @@ func (r rolebindingInfo) Create(obj interface{}) (interface{}, error) {
 	}
 
 	for namespace := range candidates {
+		if exist, err := r.kubeclient.RbacV1().RoleBindings(namespace).Get(r.ctx, userName+"-operator", metav1.GetOptions{}); err == nil && exist != nil {
+			continue
+		}
 		rolebinding := assembleResource(workspaceRolebinding, namespace, func(obj interface{}, namespace string) interface{} {
 			return &v1.RoleBinding{
 				ObjectMeta: metav1.ObjectMeta{

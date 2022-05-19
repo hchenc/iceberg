@@ -45,6 +45,7 @@ var (
 	serviceGenerator     syncer.Generator
 	volumeGenerator      syncer.Generator
 	secretGenerator      syncer.Generator
+	configmapGenerator      syncer.Generator
 
 	projectGeneratorService     syncer.GenerateService
 	groupGeneratorService       syncer.GenerateService
@@ -58,6 +59,7 @@ var (
 	serviceGeneratorService     syncer.GenerateService
 	volumeGeneratorService      syncer.GenerateService
 	secretGeneratorService      syncer.GenerateService
+	configmapGeneratorService      syncer.GenerateService
 )
 
 type Reconciler interface {
@@ -126,6 +128,7 @@ func installGenerator(clientset *clientset.ClientSet) {
 	serviceGenerator = resources.NewServiceGenerator(clientset.Ctx, clientset.Kubeclient)
 	volumeGenerator = resources.NewVolumeGenerator(clientset.Ctx, clientset.Kubeclient)
 	secretGenerator = resources.NewSecretGenerator(clientset.Ctx, clientset.Kubeclient)
+	configmapGenerator = resources.NewConfigMapGenerator(clientset.Ctx, clientset.Kubeclient)
 
 	harborGenerator = harbor.NewHarborProjectGenerator("", "", clientset.HarborClient)
 }
@@ -143,4 +146,5 @@ func installGeneratorService() {
 	serviceGeneratorService = syncer.NewGenerateService(serviceGenerator)
 	volumeGeneratorService = syncer.NewGenerateService(volumeGenerator)
 	secretGeneratorService = syncer.NewGenerateService(secretGenerator)
+	configmapGeneratorService = syncer.NewGenerateService(configmapGenerator)
 }

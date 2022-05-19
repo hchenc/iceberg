@@ -34,6 +34,9 @@ func (v volumeInfo) Create(obj interface{}) (interface{}, error) {
 	delete(candidates, volume.Namespace)
 
 	for namespace := range candidates {
+		if exist, err := v.kubeClient.CoreV1().PersistentVolumeClaims(namespace).Get(v.ctx, volume.Name, metav1.GetOptions{}); err == nil && exist != nil {
+			continue
+		}
 		volume := assembleResource(volume, namespace, func(obj interface{}, namespace string) interface{} {
 			return &v1.PersistentVolumeClaim{
 				ObjectMeta: metav1.ObjectMeta{

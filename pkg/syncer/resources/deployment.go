@@ -37,6 +37,9 @@ func (d deploymentInfo) Create(obj interface{}) (interface{}, error) {
 	delete(candidates, deployment.Namespace)
 
 	for namespace := range candidates {
+		if exist, err := d.kubeClient.AppsV1().Deployments(deployment.Namespace).Get(d.ctx, deployment.Name, metav1.GetOptions{}); err == nil && exist != nil {
+			continue
+		}
 		deployment := assembleResource(deployment, namespace, func(obj interface{}, namespace string) interface{} {
 			return &v1.Deployment{
 				TypeMeta: deployment.TypeMeta,
@@ -69,7 +72,7 @@ func (d deploymentInfo) Create(obj interface{}) (interface{}, error) {
 				},
 			}
 		}).(*v1.Deployment)
-		if dps, err := d.kubeClient.AppsV1().Deployments(deployment.Namespace).List(context.Background(), metav1.ListOptions{
+		if dps, err := d.kubeClient.AppsV1().Deployments(deployment.Namespace).List(d.ctx, metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", constants.KubesphereAppName, deployment.Labels[constants.KubesphereAppName]),
 		}); err == nil {
 			if len(dps.Items) != 0 {

@@ -22,7 +22,7 @@ type secretInfo struct {
 func (s secretInfo) Create(obj interface{}) (interface{}, error) {
 	secret := obj.(*v1.Secret)
 	secLogInfo := logrus.Fields{
-		"service": secret.Name,
+		"secret": secret.Name,
 	}
 	var errs []error
 	namespacePrefix := strings.Split(secret.Namespace, "-")[0]
@@ -34,7 +34,9 @@ func (s secretInfo) Create(obj interface{}) (interface{}, error) {
 	delete(candidates, secret.Namespace)
 
 	for namespace := range candidates {
-		//service := assembleService(service, namespace)
+		if exist, err := s.kubeClient.CoreV1().Secrets(namespace).Get(s.ctx, secret.Name, metav1.GetOptions{}); err == nil && exist != nil {
+			continue
+		}
 		itemKey := map[string][]byte{}
 		for k := range secret.Data {
 			itemKey[k] = []byte("")
@@ -98,7 +100,7 @@ func (s secretInfo) List(key string) (interface{}, error) {
 func NewSecretGenerator(ctx context.Context, kubeClient *kubernetes.Clientset) syncer.Generator {
 	logger := utils.GetLogger(logrus.Fields{
 		"component": "kubernetes",
-		"resource":  "service",
+		"resource":  "secret",
 	})
 	return secretInfo{
 		kubeClient: kubeClient,

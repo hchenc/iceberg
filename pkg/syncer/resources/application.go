@@ -38,6 +38,9 @@ func (a applicationInfo) Create(obj interface{}) (interface{}, error) {
 	var errs []error
 
 	for namespace := range candidates {
+		if exist, err := a.appClient.AppV1beta1().Applications(namespace).Get(a.ctx, application.Name, v1.GetOptions{}); err == nil && exist != nil {
+			continue
+		}
 		application := assembleResource(application, namespace, func(obj interface{}, namespace string) interface{} {
 			return &applicationv1beta1.Application{
 				ObjectMeta: v1.ObjectMeta{

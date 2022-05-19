@@ -21,7 +21,7 @@ var (
 	}
 )
 
-type filterPredicate struct {}
+type filterPredicate struct{}
 
 func (f filterPredicate) Create(event.CreateEvent) bool {
 	return false

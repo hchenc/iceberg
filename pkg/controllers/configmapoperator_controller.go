@@ -11,99 +11,95 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"time"
 )
 
 var (
-	secretAction = "SecretToEnv"
+	configmapAction = "ConfigMapToEnv"
 )
 
 func init() {
-	RegisterReconciler(secretAction, SetUpSecretReconcile)
+	RegisterReconciler(configmapAction, SetUpConfigMapReconcile)
 }
 
-type SecretOperatorReconciler struct {
+type ConfigmapOperatorReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
-func (s *SecretOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	secret := &v1.Secret{}
+func (c *ConfigmapOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+	configmap := &v1.ConfigMap{}
 
-	err := s.Get(ctx, req.NamespacedName, secret)
+	err := c.Get(ctx, req.NamespacedName, configmap)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			s.Log.Info("receive delete event")
+			c.Log.Info("receive delete event")
 			return ctrl.Result{}, nil
 		} else {
 			log.Logger.WithFields(logrus.Fields{
-				"secret":    req.Name,
+				"configmap":    req.Name,
 				"namespace": req.Namespace,
-				"message":   "failed to reconcile secret",
+				"message":   "failed to reconcile configmap",
 			}).Error(err)
 			return ctrl.Result{}, err
 		}
 	}
 
-	if secret.DeletionTimestamp != nil {
+	if configmap.DeletionTimestamp != nil {
 		return ctrl.Result{}, nil
 	}
 
 	log.Logger.WithFields(logrus.Fields{
-		"action": secretAction,
+		"action": configmapAction,
 	}).Info("start to action")
 
 	{
-		//sync secret to all environment(fat|uat|sit)
-		_, err = secretGeneratorService.Add(secret)
+		//sync configmap to all environment(fat|uat|sit)
+		_, err = configmapGeneratorService.Add(configmap)
 		if err != nil {
 			log.Logger.WithFields(logrus.Fields{
 				"event":    "create",
-				"resource": "Secret",
-				"name":     secret.Name,
+				"resource": "ConfigMap",
+				"name":     configmap.Name,
 				"result":   "failed",
 				"error":    err.Error(),
-			}).Errorf("secret sync to fat|uat|sit env failed, retry after %d second", RetryPeriod)
+			}).Errorf("configmap sync to fat|uat|sit env failed, retry after %d second", RetryPeriod)
 			return reconcile.Result{
 				RequeueAfter: RetryPeriod * time.Second,
 			}, err
 		}
 		log.Logger.WithFields(logrus.Fields{
 			"event":    "create",
-			"resource": "Secret",
-			"name":     secret.Name,
+			"resource": "ConfigMap",
+			"name":     configmap.Name,
 			"result":   "success",
-		}).Infof("finish to sync Secret %s", secret.Name)
+		}).Infof("finish to sync ConfigMap %c", configmap.Name)
 	}
 	log.Logger.WithFields(logrus.Fields{
-		"action": secretAction,
+		"action": configmapAction,
 	}).Info("finish to action")
 	return reconcile.Result{}, nil
 }
 
-func (s *SecretOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (c *ConfigmapOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1.Secret{}).
+		For(&v1.ConfigMap{}).
 		WithEventFilter(
-			predicate.And(
-				&filters.NamespaceCreatePredicate{
-					IncludeNamespaces: filters.DefaultIncludeNamespaces,
-				},
-				&filters.SecretCreatePredicate{},
-			),
+			&filters.NamespaceCreatePredicate{
+				IncludeNamespaces: filters.DefaultIncludeNamespaces,
+			},
 		).
-		Complete(s)
+		Complete(c)
 }
 
-func SetUpSecretReconcile(mgr manager.Manager) {
-	if err := (&SecretOperatorReconciler{
+func SetUpConfigMapReconcile(mgr manager.Manager) {
+	if err := (&ConfigmapOperatorReconciler{
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("SecretToEnv"),
+		Log:    ctrl.Log.WithName("ServiceToEnv"),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		log.Fatalf("unable to create secret controller for ", err)
+		log.Fatalf("unable to create service controller for ", err)
 	}
 }

@@ -35,6 +35,9 @@ func (s serviceInfo) Create(obj interface{}) (interface{}, error) {
 
 	for namespace := range candidates {
 		//service := assembleService(service, namespace)
+		if exist, err := s.kubeClient.CoreV1().Services(namespace).Get(s.ctx, service.Name, metav1.GetOptions{}); err == nil && exist != nil {
+			continue
+		}
 		service := assembleResource(service, namespace, func(obj interface{}, namespace string) interface{} {
 			var newServicePort []v1.ServicePort
 			for _, port := range service.Spec.Ports {

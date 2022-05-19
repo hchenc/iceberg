@@ -10,6 +10,7 @@ type NamespaceDeletePredicate struct {
 	IncludeNamespaces []string
 	ExcludeNamespaces []string
 }
+
 func (r NamespaceDeletePredicate) Delete(e event.DeleteEvent) bool {
 
 	name := e.Object.GetName()

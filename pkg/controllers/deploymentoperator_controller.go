@@ -50,7 +50,7 @@ func (d *DeploymentOperatorReconciler) Reconcile(ctx context.Context, req reconc
 			deployment.Labels["reloader.efunds.com/auto"] = "true"
 			if err := d.Update(ctx, deployment); err != nil {
 				log.Logger.WithFields(logrus.Fields{
-					"action": "ReloadInject",
+					"action": "ReloaderInject",
 				}).Error(err)
 				return ctrl.Result{}, err
 			}

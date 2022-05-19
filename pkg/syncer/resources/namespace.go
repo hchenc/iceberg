@@ -44,6 +44,9 @@ func (n namespaceInfo) Create(obj interface{}) (interface{}, error) {
 	creator := workspace.GetAnnotations()[constants.KubesphereCreator]
 
 	for index, namespaceName := range candidates {
+		if exist, err := n.client.CoreV1().Namespaces().Get(n.ctx, namespaceName, metav1.GetOptions{}); err == nil && exist != nil {
+			continue
+		}
 		namespace := assembleResource(workspace, namespaceName, func(obj interface{}, namespace string) interface{} {
 			return &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{

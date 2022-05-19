@@ -27,7 +27,6 @@ func (r NamespaceCreatePredicate) Create(e event.CreateEvent) bool {
 	return false
 }
 
-
 type NameCreatePredicate struct {
 	filterPredicate
 	//include namespaces has higher priority
