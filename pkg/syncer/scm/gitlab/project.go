@@ -45,6 +45,9 @@ func (p projectInfo) Create(obj interface{}) (interface{}, error) {
 		"namespace":   application.Namespace,
 	}
 	p.logger.WithFields(appLogInfo).Info("start to create gitlab project")
+	if exist, err := p.pagerClient.DevopsV1alpha1().Pagers(constants.DevopsNamespace).Get(p.ctx, "application-" + application.Name, v1.GetOptions{}); err == nil && exist != nil {
+		return nil, nil
+	}
 	appType := strings.ToLower(application.Labels[constants.KubesphereAppType])
 	pipeline, err := p.gitlabClient.GetIntegrateOption(appType)
 	if err != nil {

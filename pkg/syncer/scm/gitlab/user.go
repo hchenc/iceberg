@@ -29,6 +29,9 @@ type userInfo struct {
 
 func (u userInfo) Create(obj interface{}) (interface{}, error) {
 	user := obj.(*v1alpha2.User)
+	if exist, err := u.pagerClient.DevopsV1alpha1().Pagers(constants.DevopsNamespace).Get(u.ctx, "user-" + user.Name, v1.GetOptions{}); err == nil && exist != nil {
+		return nil, nil
+	}
 
 	gitlabUser, resp, err := u.gitlabClient.Client.Users.CreateUser(&git.CreateUserOptions{
 		Email:               git.String(user.Spec.Email),
