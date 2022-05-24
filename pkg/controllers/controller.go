@@ -45,7 +45,7 @@ var (
 	serviceGenerator     syncer.Generator
 	volumeGenerator      syncer.Generator
 	secretGenerator      syncer.Generator
-	configmapGenerator      syncer.Generator
+	configmapGenerator   syncer.Generator
 
 	projectGeneratorService     syncer.GenerateService
 	groupGeneratorService       syncer.GenerateService
@@ -59,7 +59,7 @@ var (
 	serviceGeneratorService     syncer.GenerateService
 	volumeGeneratorService      syncer.GenerateService
 	secretGeneratorService      syncer.GenerateService
-	configmapGeneratorService      syncer.GenerateService
+	configmapGeneratorService   syncer.GenerateService
 )
 
 type Reconciler interface {

@@ -29,7 +29,7 @@ func (m memberInfo) Create(obj interface{}) (interface{}, error) {
 	rolebinding := obj.(*iamv1alpha2.WorkspaceRoleBinding)
 	groupName := rolebinding.Labels[constants.KubesphereWorkspace]
 	userName := rolebinding.Subjects[0].Name
-	if exist, err := m.pagerClient.DevopsV1alpha1().Pagers(constants.DevopsNamespace).Get(m.ctx, "member-" + userName, v1.GetOptions{}); err == nil && exist != nil {
+	if exist, err := m.pagerClient.DevopsV1alpha1().Pagers(constants.DevopsNamespace).Get(m.ctx, "member-"+userName, v1.GetOptions{}); err == nil && exist != nil {
 		return nil, nil
 	}
 	groupRecord, _ := m.pagerClient.DevopsV1alpha1().Pagers(constants.DevopsNamespace).Get(m.ctx, "workspace-"+groupName, v1.GetOptions{})

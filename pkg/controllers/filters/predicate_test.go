@@ -92,18 +92,18 @@ func TestNamesFilter(t *testing.T) {
 		constants.KubesphereAppName:     "123",
 	}
 
-	result = checkLabels(labels1, version, true)
+	result = checkItemExist(labels1, version, true)
 	assert.Equal(t, result, true)
 
-	result = checkLabels(labels1, app, true)
+	result = checkItemExist(labels1, app, true)
 	assert.Equal(t, result, false)
 
-	result = checkLabels(labels1, appVersion, true)
+	result = checkItemExist(labels1, appVersion, true)
 	assert.Equal(t, result, true)
 
-	result = checkLabels(labels1, app, false)
+	result = checkItemExist(labels1, app, false)
 	assert.Equal(t, result, true)
 
-	result = checkLabels(labels2, appVersion, true)
+	result = checkItemExist(labels2, appVersion, true)
 	assert.Equal(t, result, true)
 }

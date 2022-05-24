@@ -39,7 +39,7 @@ func (c *ConfigmapOperatorReconciler) Reconcile(ctx context.Context, req reconci
 			return ctrl.Result{}, nil
 		} else {
 			log.Logger.WithFields(logrus.Fields{
-				"configmap":    req.Name,
+				"configmap": req.Name,
 				"namespace": req.Namespace,
 				"message":   "failed to reconcile configmap",
 			}).Error(err)

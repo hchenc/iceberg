@@ -78,12 +78,15 @@ func (i *IngressOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1.Ingress{}).
 		WithEventFilter(
-			predicate.Or(
+			predicate.And(
 				&filters.NamespaceCreatePredicate{
 					IncludeNamespaces: filters.DefaultIncludeNamespaces,
 				},
-				&filters.NamespaceDeletePredicate{
-					IncludeNamespaces: filters.DefaultIncludeNamespaces,
+				&filters.AnnotationCreatePredicate{
+					Force: false,
+					ExcludeAnnotations: map[string]string{
+						"nginx.ingress.kubernetes.io/upstream-vhost":"",
+					},
 				},
 			),
 		).

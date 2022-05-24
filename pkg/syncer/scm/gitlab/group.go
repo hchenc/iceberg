@@ -31,7 +31,7 @@ func (g groupInfo) Create(obj interface{}) (interface{}, error) {
 		"workspace": workspace.Name,
 	}
 	g.logger.WithFields(workspaceLogInfo).Info("start to create gitlab group")
-	if exist, err := g.pagerClient.DevopsV1alpha1().Pagers(constants.DevopsNamespace).Get(g.ctx, "workspace-" + workspace.Name, v1.GetOptions{}); err == nil && exist != nil {
+	if exist, err := g.pagerClient.DevopsV1alpha1().Pagers(constants.DevopsNamespace).Get(g.ctx, "workspace-"+workspace.Name, v1.GetOptions{}); err == nil && exist != nil {
 		return nil, nil
 	}
 

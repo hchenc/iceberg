@@ -52,11 +52,11 @@ func checkIndexKey(array []string, indexKey string) (bool, bool) {
 	return exists, verified
 }
 
-func checkLabels(labels map[string]string, target map[string]string, force bool) bool {
+func checkItemExist(items map[string]string, target map[string]string, force bool) bool {
 	result := false
 
 	for k, v := range target {
-		if value, exists := labels[k]; exists {
+		if value, exists := items[k]; exists {
 			if force {
 				result = result || exists && (value == v)
 			} else {

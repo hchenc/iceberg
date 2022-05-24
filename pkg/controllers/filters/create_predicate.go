@@ -58,12 +58,12 @@ type LabelCreatePredicate struct {
 func (d LabelCreatePredicate) Create(e event.CreateEvent) bool {
 	labels := e.Object.GetLabels()
 
-	if result := checkLabels(labels, d.IncludeLabels, d.Force); result {
-		return result
+	if len(d.IncludeLabels) != 0 {
+		return checkItemExist(labels, d.IncludeLabels, d.Force)
 	}
 
-	if result := checkLabels(labels, d.ExcludeLabels, d.Force); result {
-		return !result
+	if len(d.ExcludeLabels) != 0 {
+		return !checkItemExist(labels, d.ExcludeLabels, d.Force)
 	}
 	return false
 
@@ -79,4 +79,24 @@ func (s SecretCreatePredicate) Create(e event.CreateEvent) bool {
 		return false
 	}
 	return true
+}
+
+type AnnotationCreatePredicate struct {
+	filterPredicate
+	Force              bool
+	IncludeAnnotations map[string]string
+	ExcludeAnnotations map[string]string
+}
+
+func (a AnnotationCreatePredicate) Create(e event.CreateEvent) bool {
+	annotations := e.Object.GetAnnotations()
+
+	if len(a.IncludeAnnotations) != 0 {
+		return checkItemExist(annotations, a.IncludeAnnotations, a.Force)
+	}
+
+	if len(a.ExcludeAnnotations) != 0 {
+		return !checkItemExist(annotations, a.ExcludeAnnotations, a.Force)
+	}
+	return false
 }
