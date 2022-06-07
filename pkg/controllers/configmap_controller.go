@@ -20,7 +20,7 @@ var (
 )
 
 func init() {
-	RegisterReconciler(configmapAction, SetUpConfigMapReconcile)
+	RegisterReconciler(configmapAction, SetUpConfigMapReconciler)
 }
 
 type ConfigmapOperatorReconciler struct {
@@ -94,7 +94,7 @@ func (c *ConfigmapOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(c)
 }
 
-func SetUpConfigMapReconcile(mgr manager.Manager) {
+func SetUpConfigMapReconciler(mgr manager.Manager) {
 	if err := (&ConfigmapOperatorReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("ServiceToEnv"),

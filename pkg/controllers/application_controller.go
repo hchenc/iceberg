@@ -18,16 +18,16 @@ import (
 )
 
 func init() {
-	RegisterReconciler("AppToProject", SetUpProjectReconcile)
+	RegisterReconciler("AppToProject", SetUpProjectReconciler)
 }
 
-type ApplicationOperatorReconciler struct {
+type ApplicationReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
-func (r *ApplicationOperatorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+func (r *ApplicationReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
 	application := &v1beta1.Application{}
 
 	err := r.Get(ctx, req.NamespacedName, application)
@@ -105,7 +105,7 @@ func (r *ApplicationOperatorReconciler) Reconcile(ctx context.Context, req recon
 	return reconcile.Result{}, nil
 }
 
-func (r *ApplicationOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1beta1.Application{}).
 		WithEventFilter(
@@ -121,8 +121,8 @@ func (r *ApplicationOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error
 		Complete(r)
 }
 
-func SetUpProjectReconcile(mgr manager.Manager) {
-	if err := (&ApplicationOperatorReconciler{
+func SetUpProjectReconciler(mgr manager.Manager) {
+	if err := (&ApplicationReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("AppToProject"),
 		Scheme: mgr.GetScheme(),

@@ -18,7 +18,7 @@ import (
 )
 
 func init() {
-	RegisterReconciler("DeploymentToEnv", SetUpDeploymentReconcile)
+	RegisterReconciler("DeploymentToEnv", SetUpDeploymentReconciler)
 }
 
 type DeploymentOperatorReconciler struct {
@@ -92,7 +92,7 @@ func (d *DeploymentOperatorReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		Complete(d)
 }
 
-func SetUpDeploymentReconcile(mgr manager.Manager) {
+func SetUpDeploymentReconciler(mgr manager.Manager) {
 	if err := (&DeploymentOperatorReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("DeploymentToEnv"),

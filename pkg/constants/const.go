@@ -7,6 +7,7 @@ const (
 
 	KubesphereAppType     = "app.kubernetes.io/type"
 	KubesphereAppName     = "app.kubernetes.io/name"
+	KubesphereAppVersion  = "app.kubernetes.io/version"
 	KubesphereVersion     = "version"
 	KubesphereInitVersion = "v1"
 	KubesphereDescription = "kubesphere.io/description"

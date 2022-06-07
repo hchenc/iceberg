@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	"github.com/hchenc/iceberg/pkg/clients/clientset"
 	"github.com/hchenc/iceberg/pkg/syncer"
 	"github.com/hchenc/iceberg/pkg/syncer/registries/harbor"
@@ -12,11 +13,13 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	ingress "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/util/runtime"
+	k8sruntime "k8s.io/apimachinery/pkg/runtime"
+	urlruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	application "github.com/hchenc/application/pkg/apis/app/v1beta1"
 	iamv1alpha2 "github.com/hchenc/iceberg/pkg/apis/iam/v1alpha2"
+	servicemesh "github.com/hchenc/iceberg/pkg/apis/servicemesh/v1alpha2"
 	workspace "github.com/hchenc/iceberg/pkg/apis/tenant/v1alpha2"
 )
 
@@ -99,12 +102,14 @@ func NewControllerOrDie(cs *clientset.ClientSet, mgr manager.Manager) *Controlle
 	}
 	c.ReconcilerMap = reconcilerMap
 
-	runtime.Must(workspace.AddToScheme(mgr.GetScheme()))
-	runtime.Must(application.AddToScheme(mgr.GetScheme()))
-	runtime.Must(iamv1alpha2.AddToScheme(mgr.GetScheme()))
-	runtime.Must(appsv1.AddToScheme(mgr.GetScheme()))
-	runtime.Must(corev1.AddToScheme(mgr.GetScheme()))
-	runtime.Must(ingress.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(workspace.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(application.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(iamv1alpha2.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(appsv1.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(corev1.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(ingress.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(servicemesh.AddToScheme(mgr.GetScheme()))
+	urlruntime.Must(k8sruntime.NewScheme().SetVersionPriority(servicemesh.SchemeGroupVersion))
 
 	installGenerator(c.Clientset)
 	installGeneratorService()
