@@ -13,7 +13,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -38,7 +40,7 @@ func (s *strategyReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 			log.Logger.WithFields(logrus.Fields{
 				"strategy":  req.Name,
 				"namespace": req.Namespace,
-				"msg":   "failed to reconcile strategy",
+				"msg":       "failed to reconcile strategy",
 			}).Error(err)
 			return ctrl.Result{}, err
 		}
@@ -49,7 +51,7 @@ func (s *strategyReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	}
 
 	log.Logger.WithFields(logrus.Fields{
-		"action": "PatchApplication",
+		"action":    "PatchApplication",
 		"strategy":  req.Name,
 		"namespace": req.Namespace,
 	}).Info("start to action")
@@ -69,7 +71,7 @@ func (s *strategyReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 				log.Logger.WithFields(logrus.Fields{
 					"application": appName,
 					"namespace":   req.Namespace,
-					"msg":     "failed to get application",
+					"msg":         "failed to get application",
 				}).Error(err)
 				return ctrl.Result{}, err
 			}
@@ -98,9 +100,12 @@ func (s *strategyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&servicemeshv1alpha2.Strategy{}).
 		WithEventFilter(
-			&filters.NamespaceUpdatePredicate{
-				IncludeNamespaces: filters.DefaultIncludeNamespaces,
-			},
+			predicate.And(
+				&filters.NamespaceUpdatePredicate{
+					IncludeNamespaces: filters.DefaultIncludeNamespaces,
+				},
+				&strategyUpdatePredicate{},
+			),
 		).
 		Complete(s)
 }
@@ -113,4 +118,15 @@ func SetUpStrategyReconcile(mgr manager.Manager) {
 	}).SetupWithManager(mgr); err != nil {
 		log.Fatalf("unable to create strategy controller for ", err)
 	}
+}
+
+type strategyUpdatePredicate struct {
+	filters.NamespaceUpdatePredicate
+}
+
+func (s strategyUpdatePredicate) Update(e event.UpdateEvent) bool {
+	if references := e.ObjectOld.GetOwnerReferences(); references == nil {
+		return false
+	}
+	return true
 }
